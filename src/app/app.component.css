@@ -21,7 +21,7 @@ body {
 
 #fileList {
     cursor: default;
-    height: 200px;
+    height: 300px;
     overflow-y: auto;
     overflow-x: hidden;
     padding-top: 10px;
