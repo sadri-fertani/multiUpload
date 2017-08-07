@@ -1,0 +1,78 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+
+.dropZoneActivated {
+    border: 2px solid #28cc3d;
+    cursor: copy;
+}
+
+.dropZoneNotAllowed {
+    border: 2px solid #f00;
+    cursor: not-allowed;
+}
+
+.dropZone {
+    border: 2px dashed #ccc;
+    cursor: default;
+}
+
+#fileList {
+    cursor: default;
+    height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+div.progress {
+    margin-bottom: 0px;
+}
+
+.dropZoneText {
+    color: grey;
+    text-align: center;
+}
+
+.top5 {
+    margin-top: 5px;
+}
+
+.top10 {
+    margin-top: 10px;
+}
+
+.red, .red a {
+    color: #f00;
+}
+
+.green, .green a {
+    color: #28cc3d;
+}

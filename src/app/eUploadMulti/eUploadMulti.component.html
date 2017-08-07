@@ -1,0 +1,125 @@
+<div class="container">
+    <div class="row">
+        <div class="col col-md-3 col-sm-12 col-xs-12">
+            <!-- Input file -->
+            <div class="btn btn-primary btn-file">
+                {{Label}}
+                <input #inputFile type="file" id="inputFile" title="Sélectionner des fichiers" multiple (change)="onChange($event)" [disabled]="IsUploading || IsEditMode"
+                />
+            </div>
+            <!--Selected files number-->
+            <span *ngIf="!files || files.length ==0">Aucun fichier</span>
+            <span *ngIf="!files || files.length ==1">Un fichier</span>
+            <span *ngIf="!files || files.length >1">{{files.length}} fichiers ({{TotalSize}})</span>
+        </div>
+
+        <div class="col col-md-3 col-sm-12 col-xs-12" *ngIf="files.length > 0">
+            <!-- Vider/Uploader buttons -->
+            <span *ngIf="!IsUploading && !IsEditMode">
+                <a class="btn btn-default" title="Clear selected files" (click)="removeAllFiles();"><i class="glyphicon glyphicon-trash"></i>&nbsp;Remove all</a>
+                &nbsp;&nbsp;
+                <a class="btn btn-success" (click)="uploadAllFiles();"><i class="glyphicon glyphicon-upload"></i>&nbsp;Upload</a>
+            </span>
+
+            <!-- abort button -->
+            <span *ngIf="IsUploading">
+                <a class="btn btn-danger" (click)="abortAllFiles();" title="Abort all files uploading"><i class="glyphicon glyphicon-remove"></i>&nbsp;Abort</a>
+            </span>
+        </div>
+
+        <div id="initialDropZone" #dropZone class="col col-md-5 col-sm-12 col-xs-12" [style.visibility]="!files || files.length == 0 ? 'visible' : 'hidden'"
+            (dragenter)="onDragEnterOverEvents($event)" (dragover)="onDragEnterOverEvents($event)" (drop)="onDropEvent($event)"
+            (dragleave)="onDragLeaveEvent($event)" [class.dropZoneActivated]="IsInsideDropZone" [class.dropZone]="!IsInsideDropZone">
+            <p class="dropZoneText">
+                Drag and drop files here
+            </p>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<div id="fileList" #fileList [style.visibility]="files.length > 0 ? 'visible' : 'hidden'" (dragenter)="onDragEnterOverEvents($event)" (dragover)="onDragEnterOverEvents($event)"
+    (drop)="onDropEvent($event)" (dragleave)="onDragLeaveEvent($event)" [class.dropZoneNotAllowed]="uploadEnCours" [class.dropZoneActivated]="!uploadEnCours && IsInsideDropZone" [class.dropZone]="!uploadEnCours && !IsInsideDropZone">
+    <div class="container">
+        <!--Do not show the header for small screens-->
+        <div class="row hidden-xs hidden-sm" id="rowHeader">
+            <div class="col col-md-4">
+                <strong>Filename</strong>
+            </div>
+            <div class="col col-md-2">
+                <strong>Size</strong>
+            </div>
+            <div class="col col-md-3">
+                <strong>Progress</strong>
+            </div>
+            <div class="col col-md-1">
+                <strong>Status</strong>
+            </div>
+            <div class="col col-md-2">
+                <strong>Actions</strong>
+            </div>
+        </div>
+
+        <div *ngFor="let file of files">
+            <form #myForm="ngForm" novalidate>
+                <div class="row top5">
+                    <!--Filename-->
+                    <div class="col col-md-4 col-xs-12">
+                        <div [style.visibility]="!file.isEdited ? 'visible' : 'hidden'">
+                            {{file.fileNameDisplay}}{{file.fileExtension}} <span class="hidden-sm hidden-md hidden-lg">({{file.fileSizeDisplay}})</span>
+                        </div>
+                        <div [style.visibility]="file.isEdited ? 'visible' : 'hidden'">
+                            <input required #newFileName name="newFileName" class="form-control" [(ngModel)]="file.fileNameDisplay" (keydown)="keyDownEditFileName($event, myForm, file);"
+                                [attr.maxlength]="100" style="margin: 2px;" />
+                        </div>
+                    </div>
+                    <!--Size-->
+                    <div class="col col-md-2 hidden-xs">
+                        {{file.fileSizeDisplay}}
+                    </div>
+                    <!--Progress-->
+                    <div class="col col-md-3 col-xs-8">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuemin="0" [class.active]="file.isRunning" [class.progress-bar-danger]="file.isError"
+                                [class.progress-bar-success]="file.isSuccess" [class.progress-bar-warning]="file.isAborted" aria-valuemax="100"
+                                [style.width]="file.progress + '%'">
+                                {{file.progress}}%
+                            </div>
+                        </div>
+                    </div>
+                    <!--Status-->
+                    <div class="col col-md-1 hidden-xs">
+                        <span *ngIf="file.isSuccess" title="Upload OK"><i class="glyphicon glyphicon-ok green"></i></span>
+                        <span *ngIf="file.isError" title="Upload KO"><i class="glyphicon glyphicon-remove red"></i></span>
+                    </div>
+                    <!--Actions-->
+                    <div class="col col-md-2 col-xs-4">
+                        <span *ngIf="!IsEditMode && !file.isEdited">
+                            <!--Edit filename-->
+                            <a *ngIf="!file.isRunning" (click)="editFileName(file)" title="Edit filename"><i class="glyphicon glyphicon-pencil"></i></a>
+                            <!--Remove file from selection-->
+                            <a *ngIf="!file.isRunning" (click)="deleteFileFromList(file)" title="Remove item from selection"><i class="glyphicon glyphicon-trash"></i></a>
+                            <!--Delete file from server-->
+                            <a *ngIf="file.isSuccess" (click)="deleteFileFromServer(file)" title="Delete file from server"><i class="glyphicon glyphicon-floppy-remove"></i></a>
+                            <!--Upload item-->
+                            <a *ngIf="!file.isRunning && !file.isSuccess" (click)="uploadFile(file);" title="Upload item"><i class="glyphicon glyphicon-upload green"></i></a>
+                        </span>
+
+                        <!--Abort upload-->
+                        <span>
+                            <a *ngIf="file.isRunning" (click)="abortFile(file)" title="Abort"><i class="glyphicon glyphicon-remove-circle red"></i></a>
+                        </span>
+
+                        <span *ngIf="file.isEdited">
+                            <!--Annuler les modifications apportées au nom-->
+                            <button class="btn btn-xs btn-danger" (click)="cancelEditFileName(file);" title="Annuler"><i class="glyphicon glyphicon-remove"></i></button>
+                            <!--Valider les modifications apportées au nom-->
+                            <button class="btn btn-xs btn-success" (click)="validateEditFileName(file);" [disabled]="!myForm.valid" title="Valider"><i class="glyphicon glyphicon-ok"></i></button>
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

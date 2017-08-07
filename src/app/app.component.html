@@ -1,0 +1,23 @@
+<div class="container">
+    <form [formGroup]="complexForm" novalidate (ngSubmit)="submitForm(complexForm.value)">
+        <div class="form-group">
+            <label for="iUser">User</label>
+            <input type="text" name="iUser" id="iUser" [formControl]="complexForm.controls['iUser']" class="form-control" placeholder="Votre nom..."
+                [class.alert-danger]="!complexForm.controls['iUser'].valid && complexForm.controls['iUser'].touched" />
+        </div>
+        <div class="form-group">
+            <label for="iMessage">Message</label>
+            <input type="text" name="iMessage" id="iMessage" [formControl]="complexForm.controls['iMessage']" class="form-control" placeholder="Votre message..."
+                [class.alert-danger]="!complexForm.controls['iMessage'].valid && complexForm.controls['iMessage'].touched" />
+        </div>
+        <div class="form-group">
+            <label for="iFiles">Documents</label>
+            <eUpload id="iFiles" name="iFiles" AutoUpload="False" [(Ref)]="iFiles" [formControl]="complexForm.controls['iFiles']" 
+                [class.alert-danger]="!complexForm.controls['iFiles'].valid && complexForm.controls['iFiles'].touched && !(complexForm.controls.iFiles.errors && complexForm.controls.iFiles.errors.uploading)"></eUpload>
+        </div>
+        <div class="form-group">
+            <button type="reset" class="btn btn-secondary" (click)="reset()">Reset</button>
+            <button type="submit" class="btn btn-primary" title="Validate" [disabled]="!complexForm.valid">Submit</button>
+        </div>
+    </form>
+</div>
